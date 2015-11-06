@@ -10,7 +10,6 @@ import unittest
 from io import StringIO
 from tempfile import TemporaryFile
 import gc
-from test import support
 
 from unicodecsv import xcsv as csv
 
@@ -211,17 +210,6 @@ class Test_Csv(unittest.TestCase):
             writer.writerows([['a','b'],['c','d']])
             fileobj.seek(0)
             self.assertEqual(fileobj.read(), "a,b\r\nc,d\r\n")
-
-    @support.cpython_only
-    def test_writerows_legacy_strings(self):
-        import _testcapi
-
-        c = _testcapi.unicode_legacy_string('a')
-        with TemporaryFile("w+", newline='') as fileobj:
-            writer = csv.writer(fileobj)
-            writer.writerows([[c]])
-            fileobj.seek(0)
-            self.assertEqual(fileobj.read(), "a\r\n")
 
     def _read_test(self, input, expect, **kwargs):
         reader = csv.reader(input, **kwargs)
@@ -990,77 +978,6 @@ Stonecutters Seafood and Chop House+ Lemont+ IL+ 12/19/02+ Week Back
         dialect = sniffer.sniff(self.sample9)
         self.assertTrue(dialect.doublequote)
 
-class NUL:
-    def write(s, *args):
-        pass
-    writelines = write
-
-@unittest.skipUnless(hasattr(sys, "gettotalrefcount"),
-                     'requires sys.gettotalrefcount()')
-class TestLeaks(unittest.TestCase):
-    def test_create_read(self):
-        delta = 0
-        lastrc = sys.gettotalrefcount()
-        for i in range(20):
-            gc.collect()
-            self.assertEqual(gc.garbage, [])
-            rc = sys.gettotalrefcount()
-            csv.reader(["a,b,c\r\n"])
-            csv.reader(["a,b,c\r\n"])
-            csv.reader(["a,b,c\r\n"])
-            delta = rc-lastrc
-            lastrc = rc
-        # if csv.reader() leaks, last delta should be 3 or more
-        self.assertEqual(delta < 3, True)
-
-    def test_create_write(self):
-        delta = 0
-        lastrc = sys.gettotalrefcount()
-        s = NUL()
-        for i in range(20):
-            gc.collect()
-            self.assertEqual(gc.garbage, [])
-            rc = sys.gettotalrefcount()
-            csv.writer(s)
-            csv.writer(s)
-            csv.writer(s)
-            delta = rc-lastrc
-            lastrc = rc
-        # if csv.writer() leaks, last delta should be 3 or more
-        self.assertEqual(delta < 3, True)
-
-    def test_read(self):
-        delta = 0
-        rows = ["a,b,c\r\n"]*5
-        lastrc = sys.gettotalrefcount()
-        for i in range(20):
-            gc.collect()
-            self.assertEqual(gc.garbage, [])
-            rc = sys.gettotalrefcount()
-            rdr = csv.reader(rows)
-            for row in rdr:
-                pass
-            delta = rc-lastrc
-            lastrc = rc
-        # if reader leaks during read, delta should be 5 or more
-        self.assertEqual(delta < 5, True)
-
-    def test_write(self):
-        delta = 0
-        rows = [[1,2,3]]*5
-        s = NUL()
-        lastrc = sys.gettotalrefcount()
-        for i in range(20):
-            gc.collect()
-            self.assertEqual(gc.garbage, [])
-            rc = sys.gettotalrefcount()
-            writer = csv.writer(s)
-            for row in rows:
-                writer.writerow(row)
-            delta = rc-lastrc
-            lastrc = rc
-        # if writer leaks during write, last delta should be 5 or more
-        self.assertEqual(delta < 5, True)
 
 class TestUnicode(unittest.TestCase):
 
