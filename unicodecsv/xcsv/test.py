@@ -727,7 +727,7 @@ class TestArrayWrites(unittest.TestCase):
     def test_int_write(self):
         import array
         contents = [(20-i) for i in range(20)]
-        a = array.array('i', contents)
+        a = array.array(str('i'), contents)
 
         with TemporaryFile("w+", newline='') as fileobj:
             writer = csv.writer(fileobj, dialect="excel")
@@ -739,7 +739,7 @@ class TestArrayWrites(unittest.TestCase):
     def test_double_write(self):
         import array
         contents = [(20-i)*0.1 for i in range(20)]
-        a = array.array('d', contents)
+        a = array.array(str('d'), contents)
         with TemporaryFile("w+", newline='') as fileobj:
             writer = csv.writer(fileobj, dialect="excel")
             writer.writerow(a)
@@ -750,7 +750,7 @@ class TestArrayWrites(unittest.TestCase):
     def test_float_write(self):
         import array
         contents = [(20-i)*0.1 for i in range(20)]
-        a = array.array('f', contents)
+        a = array.array(str('f'), contents)
         with TemporaryFile("w+", newline='') as fileobj:
             writer = csv.writer(fileobj, dialect="excel")
             writer.writerow(a)
@@ -760,7 +760,7 @@ class TestArrayWrites(unittest.TestCase):
 
     def test_char_write(self):
         import array, string
-        a = array.array('u', string.ascii_letters)
+        a = array.array(str('u'), string.ascii_letters)
 
         with TemporaryFile("w+", newline='') as fileobj:
             writer = csv.writer(fileobj, dialect="excel")
