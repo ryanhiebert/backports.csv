@@ -64,7 +64,7 @@ def register_dialect(name, dialect):
     _dialect_registry[name] = dialect
 
 def unregister_dialect(name):
-    _dialect_registery.pop(name)
+    _dialect_registry.pop(name)
 
 def get_dialect(name):
     return _dialect_registry[name]
