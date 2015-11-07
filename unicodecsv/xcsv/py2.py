@@ -94,6 +94,7 @@ class Dialect(object):
     quoting = None
 
     def __init__(self):
+        self.validate(self)
         if self.__class__ != Dialect:
             self._valid = True
 
