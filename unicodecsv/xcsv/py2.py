@@ -96,8 +96,6 @@ class Dialect(object):
 
     @staticmethod
     def validate(dialect):
-        if not isinstance(dialect.lineterminator, string_types):
-            raise Error('"lineterminator" must be a string')
         if not isinstance(dialect.delimiter, text_type):
             if type(dialect.delimiter) == bytes:
                 raise Error('"delimiter" must be string, not bytes')
@@ -105,6 +103,8 @@ class Dialect(object):
                 type(dialect.delimiter).__name__))
         if len(dialect.delimiter) != 1:
             raise Error('"delimiter" must be a 1-character string')
+        if not isinstance(dialect.lineterminator, string_types):
+            raise Error('"lineterminator" must be a string')
 
     @classmethod
     def extend(cls, dialect, **fmtparams):
