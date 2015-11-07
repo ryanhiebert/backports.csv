@@ -26,8 +26,12 @@ def TemporaryFile(mode='w+b', newline=None, encoding=None):
 
 class TestCase(unittest.TestCase):
     def assertIn(self, item, container):
-        self.assertTrue( item in container,
+        self.assertTrue(item in container,
             '{0} not in {1}'.format(repr(item), repr(container)))
+
+    def assertNotIn(self, item, container):
+        self.assertFalse(item in container,
+            '{0} in {1}'.format(repr(item), repr(container)))
 
     def assertRaisesGetException(self, exc, func, *args, **kwargs):
         try:
