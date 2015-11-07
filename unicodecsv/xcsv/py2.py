@@ -26,15 +26,18 @@ unichr = chr if PY3 else unichr
 
 def extend_dialect(dialect, **fmtparams):
     """Make a new class with the fmtparams overridden."""
+    if isinstance(dialect, Dialect):
+        # Don't extend an instance, only a class
+        return dialect
     if isinstance(dialect, string_types):
         dialect = get_dialect(dialect)
-    return type(str('ExtendedDialect'), (dialect,), dict(fmtparams))
+    return type(str('ExtendedDialect'), (dialect,), dict(fmtparams))()
 
 
 class writer(object):
     def __init__(self, fileobj, dialect='excel', **fmtparams):
         self.fileobj = fileobj
-        self.dialect = extend_dialect(dialect, **fmtparams)()
+        self.dialect = extend_dialect(dialect, **fmtparams)
 
     def writerow(self, row):
         row = [text_type(item) for item in row]
@@ -49,7 +52,7 @@ class writer(object):
 class reader(object):
     def __init__(self, fileobj, dialect='excel', **fmtparams):
         self.fileobj = iter(fileobj)
-        self.dialect = extend_dialect(dialect, **fmtparams)()
+        self.dialect = extend_dialect(dialect, **fmtparams)
         self.line_num = 0
 
     def __iter__(self):
@@ -107,7 +110,6 @@ class Dialect(object):
             raise Error('"lineterminator" must be a string')
         if not isinstance(self.delimiter, text_type):
             if type(self.delimiter) == bytes:
-                print(repr(self.delimiter))
                 raise Error('"delimiter" must be string, not bytes')
             raise Error('"delimiter" must be string, not {0}'.format(
                 type(self.delimiter).__name__))
