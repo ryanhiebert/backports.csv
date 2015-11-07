@@ -19,6 +19,7 @@ from csv import (
 import sys
 PY3 = sys.version_info[0] == 3
 string_types = str if PY3 else basestring
+text_type = str if PY3 else unicode
 
 
 def extend_dialect(dialect, **fmtparams):
@@ -34,6 +35,7 @@ class writer(object):
         self.dialect = extend_dialect(dialect, **fmtparams)()
 
     def writerow(self, row):
+        row = [text_type(item) for item in row]
         line = self.dialect.delimiter.join(row) + self.dialect.lineterminator
         self.fileobj.write(line)
 
