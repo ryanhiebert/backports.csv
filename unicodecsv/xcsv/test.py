@@ -882,6 +882,10 @@ class TestDialectValidity(unittest.TestCase):
         self.do_invalid_chars("quotechar")
 
 class TestSniffer(unittest.TestCase):
+    def assertIn(self, item, container):
+        self.assertTrue( item in container,
+            '{0} not in {1}'.format(repr(item), repr(container)))
+
     sample1 = """\
 Harry's, Arlington Heights, IL, 2/1/03, Kimi Hayes
 Shark City, Glendale Heights, IL, 12/28/02, Prezence
