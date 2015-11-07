@@ -94,8 +94,13 @@ class Dialect(object):
     quoting = None
 
     def __init__(self):
+        self._validate()
         if self.__class__ != Dialect:
             self._valid = True
+
+    def _validate(self):
+        if not isinstance(self.lineterminator, string_types):
+            raise Error('"lineterminator" must be a string')
 
 
 class excel(Dialect):
