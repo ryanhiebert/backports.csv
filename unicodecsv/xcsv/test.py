@@ -860,20 +860,26 @@ class TestDialectValidity(unittest.TestCase):
         self.assertEqual(str(cm.exception),
                          '"lineterminator" must be a string')
 
-    def test_invalid_chars(self):
+    def do_invalid_chars(self, field_name):
         def create_invalid(field_name, value):
             class mydialect(csv.Dialect):
                 pass
             setattr(mydialect, field_name, value)
             d = mydialect()
 
-        for field_name in ("delimiter", "escapechar", "quotechar"):
-            with self.subTest(field_name=field_name):
-                self.assertRaises(csv.Error, create_invalid, field_name, "")
-                self.assertRaises(csv.Error, create_invalid, field_name, "abc")
-                self.assertRaises(csv.Error, create_invalid, field_name, b'x')
-                self.assertRaises(csv.Error, create_invalid, field_name, 5)
+        self.assertRaises(csv.Error, create_invalid, field_name, "")
+        self.assertRaises(csv.Error, create_invalid, field_name, "abc")
+        self.assertRaises(csv.Error, create_invalid, field_name, b'x')
+        self.assertRaises(csv.Error, create_invalid, field_name, 5)
 
+    def test_invalid_chars_delimiter(self):
+        self.do_invalid_chars("delimiter")
+
+    def test_invalid_chars_escapechar(self):
+        self.do_invalid_chars("escapechar")
+
+    def test_invalid_chars_quotechar(self):
+        self.do_invalid_chars("quotechar")
 
 class TestSniffer(unittest.TestCase):
     sample1 = """\
