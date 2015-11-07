@@ -14,17 +14,47 @@ from csv import (
     __version__, __doc__, Error, field_size_limit, Sniffer,
 )
 
+def extend_dialect(dialect, **fmtparams):
+    """Make a new class with the fmtparams overridden."""
+    return type(str('ExtendedDialect'), (dialect,), dict(fmtparams))
 
-def writer():
+
+class writer(object):
+    def __init__(self, fileobj, dialect='excel', **fmtparams):
+        self.fileobj = fileobj
+        base_dialect = get_dialect(dialect)
+        dialect_class = extend_dialect(base_dialect, **fmtparams)
+        self.dialect = dialect_class()
+
+    def writerow(self, row):
+        line = self.dialect.delimiter.join(row) + self.dialect.lineterminator
+        self.fileobj.write(line)
+
+
+class reader(object):
+    def __init__(self, fileobj, dialect='excel', **fmtparams):
+        self.fileobj = iter(fileobj)
+        base_dialect = get_dialect(dialect)
+        dialect_class = extend_dialect(base_dialect, **fmtparams)
+        self.dialect = dialect_class()
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        line = next(self.fileobj)
+        if line.endswith(self.dialect.lineterminator):
+            line = line[:-(len(self.dialect.lineterminator))]
+        return line.split(self.dialect.delimiter)
+
+    next = __next__
+
+
+class DictReader(object):
     pass
 
-def reader():
-    pass
 
-class DictReader():
-    pass
-
-class DictWriter():
+class DictWriter(object):
     pass
 
 
@@ -37,13 +67,13 @@ def unregister_dialect(name):
     _dialect_registery.pop(name)
 
 def get_dialect(name):
-    _dialect_registry[name]
+    return _dialect_registry[name]
 
 def list_dialects():
     return list(_dialect_registry)
 
 
-class Dialect:
+class Dialect(object):
     """Describe a CSV dialect.
     This must be subclassed (see csv.excel).  Valid attributes are:
     delimiter, quotechar, escapechar, doublequote, skipinitialspace,
