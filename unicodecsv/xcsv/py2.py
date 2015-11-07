@@ -94,17 +94,23 @@ class Dialect(object):
         if self.__class__ != Dialect:
             self._valid = True
 
+    @classmethod
+    def validate(cls, dialect):
+        cls.validate_text(dialect, 'quotechar', one_char=True)
+        cls.validate_text(dialect, 'delimiter', one_char=True)
+        cls.validate_text(dialect, 'lineterminator', one_char=False)
+
     @staticmethod
-    def validate(dialect):
-        if not isinstance(dialect.delimiter, text_type):
-            if type(dialect.delimiter) == bytes:
-                raise Error('"delimiter" must be string, not bytes')
-            raise Error('"delimiter" must be string, not {0}'.format(
-                type(dialect.delimiter).__name__))
-        if len(dialect.delimiter) != 1:
-            raise Error('"delimiter" must be a 1-character string')
-        if not isinstance(dialect.lineterminator, string_types):
-            raise Error('"lineterminator" must be a string')
+    def validate_text(dialect, attr, one_char=False):
+        val = getattr(dialect, attr)
+        if not isinstance(val, text_type):
+            if type(dialect.quotechar) == bytes:
+                raise Error('"{0}" must be a string, not bytes'.format(attr))
+            raise Error('"{0}" must be a string, not {1}'.format(
+                attr, type(val).__name__))
+
+        if one_char and len(val) != 1:
+            raise Error('"{0}" must be a 1-character string'.format(attr))
 
     @classmethod
     def extend(cls, dialect, **fmtparams):
