@@ -20,6 +20,8 @@ import sys
 PY3 = sys.version_info[0] == 3
 string_types = str if PY3 else basestring
 text_type = str if PY3 else unicode
+binary_type = bytes if PY3 else str
+unichr = chr if PY3 else unichr
 
 
 def extend_dialect(dialect, **fmtparams):
@@ -101,6 +103,14 @@ class Dialect(object):
     def _validate(self):
         if not isinstance(self.lineterminator, string_types):
             raise Error('"lineterminator" must be a string')
+        if not isinstance(self.delimiter, text_type):
+            if type(self.delimiter) == bytes:
+                print(repr(self.delimiter))
+                raise Error('"delimiter" must be string, not bytes')
+            raise Error('"delimiter" must be string, not {0}'.format(
+                type(self.delimiter).__name__))
+        if len(self.delimiter) != 1:
+            raise Error('"delimiter" must be a 1-character string')
 
 
 class excel(Dialect):
@@ -352,7 +362,7 @@ class Sniffer:
 
         data = list(filter(None, data.split('\n')))
 
-        ascii = [chr(c) for c in range(127)] # 7-bit ASCII
+        ascii = [unichr(c) for c in range(127)] # 7-bit ASCII
 
         # build frequency tables
         chunkLength = min(10, len(data))
