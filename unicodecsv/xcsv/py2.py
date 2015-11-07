@@ -50,6 +50,7 @@ class reader(object):
     def __init__(self, fileobj, dialect='excel', **fmtparams):
         self.fileobj = iter(fileobj)
         self.dialect = extend_dialect(dialect, **fmtparams)()
+        self.line_num = 0
 
     def __iter__(self):
         return self
@@ -58,6 +59,7 @@ class reader(object):
         line = next(self.fileobj)
         if line.endswith(self.dialect.lineterminator):
             line = line[:-(len(self.dialect.lineterminator))]
+        self.line_num += 1
         return line.split(self.dialect.delimiter)
 
     next = __next__
