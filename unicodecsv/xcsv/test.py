@@ -7,11 +7,21 @@ import io
 import sys
 import os
 import unittest
-from io import StringIO
-from tempfile import TemporaryFile
+from io import BytesIO, StringIO, TextIOWrapper
 import gc
 
 from unicodecsv import xcsv as csv
+
+
+def TemporaryFile(mode='w+b', newline=None, encoding=None):
+    """
+    A Python 2/3 compatible wrapper for TemporaryFile.
+
+    It has only the functionality needed for this test module.
+    """
+    assert mode == 'w+', 'Only w+ mode is supported'
+    file_like = BytesIO()
+    return TextIOWrapper(file_like, newline=newline, encoding=encoding)
 
 
 class Test_Csv(unittest.TestCase):
