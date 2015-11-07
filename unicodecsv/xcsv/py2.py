@@ -24,20 +24,10 @@ binary_type = bytes if PY3 else str
 unichr = chr if PY3 else unichr
 
 
-def extend_dialect(dialect, **fmtparams):
-    """Make a new class with the fmtparams overridden."""
-    if isinstance(dialect, Dialect):
-        # Don't extend an instance, only a class
-        return dialect
-    if isinstance(dialect, string_types):
-        dialect = get_dialect(dialect)
-    return type(str('ExtendedDialect'), (dialect,), dict(fmtparams))()
-
-
 class writer(object):
     def __init__(self, fileobj, dialect='excel', **fmtparams):
         self.fileobj = fileobj
-        self.dialect = extend_dialect(dialect, **fmtparams)
+        self.dialect = Dialect.extend(dialect, **fmtparams)
 
     def writerow(self, row):
         row = [text_type(item) for item in row]
@@ -52,7 +42,7 @@ class writer(object):
 class reader(object):
     def __init__(self, fileobj, dialect='excel', **fmtparams):
         self.fileobj = iter(fileobj)
-        self.dialect = extend_dialect(dialect, **fmtparams)
+        self.dialect = Dialect.extend(dialect, **fmtparams)
         self.line_num = 0
 
     def __iter__(self):
@@ -101,20 +91,39 @@ class Dialect(object):
     quoting = None
 
     def __init__(self):
-        self._validate()
         if self.__class__ != Dialect:
             self._valid = True
 
-    def _validate(self):
-        if not isinstance(self.lineterminator, string_types):
+    @staticmethod
+    def validate(dialect):
+        if not isinstance(dialect.lineterminator, string_types):
             raise Error('"lineterminator" must be a string')
-        if not isinstance(self.delimiter, text_type):
-            if type(self.delimiter) == bytes:
+        if not isinstance(dialect.delimiter, text_type):
+            if type(dialect.delimiter) == bytes:
                 raise Error('"delimiter" must be string, not bytes')
             raise Error('"delimiter" must be string, not {0}'.format(
-                type(self.delimiter).__name__))
-        if len(self.delimiter) != 1:
+                type(dialect.delimiter).__name__))
+        if len(dialect.delimiter) != 1:
             raise Error('"delimiter" must be a 1-character string')
+
+    @classmethod
+    def extend(cls, dialect, **fmtparams):
+        """Create a new dialect with the added parameters."""
+        if isinstance(dialect, string_types):
+            dialect = get_dialect(dialect)
+
+        attrs = [
+            'delimiter', 'quotechar', 'escapechar', 'doublequote',
+            'skipinitialspace', 'lineterminator', 'quoting',
+        ]
+        if fmtparams:
+            new_fmtparams = dict(
+                (attr, getattr(dialect, attr, None)) for attr in attrs)
+            new_fmtparams.update(fmtparams)
+            dialect = type(str('ExtendedDialect'), (cls,), new_fmtparams)
+
+        cls.validate(dialect)
+        return dialect
 
 
 class excel(Dialect):
