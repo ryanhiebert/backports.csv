@@ -173,6 +173,8 @@ class DictReader:
                 d[key] = self.restval
         return d
 
+    next = __next__
+
 
 class DictWriter:
     def __init__(self, f, fieldnames, restval="", extrasaction="raise",
