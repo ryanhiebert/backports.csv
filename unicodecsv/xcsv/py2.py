@@ -67,7 +67,10 @@ def unregister_dialect(name):
     _dialect_registry.pop(name)
 
 def get_dialect(name):
-    return _dialect_registry[name]
+    try:
+        return _dialect_registry[name]
+    except KeyError:
+        raise Error('Could not find dialect {0}'.format(name))
 
 def list_dialects():
     return list(_dialect_registry)
