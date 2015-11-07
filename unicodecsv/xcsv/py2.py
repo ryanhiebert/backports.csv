@@ -37,6 +37,10 @@ class writer(object):
         line = self.dialect.delimiter.join(row) + self.dialect.lineterminator
         self.fileobj.write(line)
 
+    def writerows(self, rows):
+        for row in rows:
+            self.writerow(row)
+
 
 class reader(object):
     def __init__(self, fileobj, dialect='excel', **fmtparams):
