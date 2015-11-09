@@ -66,12 +66,25 @@ class reader(object):
 
 
 _dialect_registry = {}
-def register_dialect(name, dialect):
+def register_dialect(name, dialect=None, **fmtparams):
+    if not isinstance(name, text_type):
+        raise TypeError('"name" must be a string')
+
+    dialect = Dialect.extend(dialect, fmtparams)
+
+    try:
+        Dialect.validate(dialect)
+    except:
+        raise TypeError('dialect is invalid')
+
     assert name not in _dialect_registry
     _dialect_registry[name] = dialect
 
 def unregister_dialect(name):
-    _dialect_registry.pop(name)
+    try:
+        _dialect_registry.pop(name)
+    except KeyError:
+        raise Error('"{name}" not a registered dialect'.format(name=name))
 
 def get_dialect(name):
     try:
@@ -161,6 +174,10 @@ class Dialect(object):
             return dialect
 
         defaults = cls.defaults()
+
+        if any(param not in defaults for param in fmtparams):
+            raise TypeError('Invalid fmtparam')
+
         specified = dict(
             (attr, getattr(dialect, attr, None))
             for attr in cls.defaults()
