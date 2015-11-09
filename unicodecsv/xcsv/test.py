@@ -371,17 +371,21 @@ class TestDialectRegistry(TestCase):
         expected_dialects = csv.list_dialects() + [name]
         expected_dialects.sort()
         csv.register_dialect(name, myexceltsv)
-        self.addCleanup(csv.unregister_dialect, name)
-        self.assertEqual(csv.get_dialect(name).delimiter, '\t')
-        got_dialects = sorted(csv.list_dialects())
-        self.assertEqual(expected_dialects, got_dialects)
+        try:
+            self.assertEqual(csv.get_dialect(name).delimiter, '\t')
+            got_dialects = sorted(csv.list_dialects())
+            self.assertEqual(expected_dialects, got_dialects)
+        finally:
+            csv.unregister_dialect(name)
 
     def test_register_kwargs(self):
         name = 'fedcba'
         csv.register_dialect(name, delimiter=';')
-        self.addCleanup(csv.unregister_dialect, name)
-        self.assertEqual(csv.get_dialect(name).delimiter, ';')
-        self.assertEqual([['X', 'Y', 'Z']], list(csv.reader(['X;Y;Z'], name)))
+        try:
+            self.assertEqual(csv.get_dialect(name).delimiter, ';')
+            self.assertEqual([['X', 'Y', 'Z']], list(csv.reader(['X;Y;Z'], name)))
+        finally:
+            csv.unregister_dialect(name)
 
     def test_incomplete_dialect(self):
         class myexceltsv(csv.Dialect):
