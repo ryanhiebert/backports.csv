@@ -49,7 +49,10 @@ class reader(object):
         return self
 
     def __next__(self):
-        line = next(self.fileobj)
+        line = ''
+        while not line.strip():
+            line = next(self.fileobj)
+
         if line.endswith(self.dialect.lineterminator):
             line = line[:-(len(self.dialect.lineterminator))]
         self.line_num += 1
