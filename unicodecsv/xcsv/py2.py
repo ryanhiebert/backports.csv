@@ -126,7 +126,7 @@ class Dialect(object):
     def __init__(self):
         self.validate(self)
         if self.__class__ != Dialect:
-            super(Dialect, self).__setattr__('_valid', True)
+            self._valid = True
 
     @classmethod
     def validate(cls, dialect):
@@ -214,10 +214,12 @@ class Dialect(object):
     def __delattr__(self, attr):
         if self._valid:
             raise AttributeError('dialect is immutable.')
+        super(Dialect, self).__delattr__(attr)
 
     def __setattr__(self, attr, value):
         if self._valid:
             raise AttributeError('dialect is immutable.')
+        super(Dialect, self).__setattr__(attr, value)
 
 
 class excel(Dialect):
