@@ -108,7 +108,7 @@ class Dialect(object):
 
         if dialect.delimiter is None:
             raise Error('delimiter must be set')
-        cls.validate_text(dialect, 'delimiter', one_char=True)
+        cls.validate_text(dialect, 'delimiter')
 
         if dialect.lineterminator is None:
             raise Error('lineterminator must be set')
@@ -118,10 +118,10 @@ class Dialect(object):
         if dialect.quoting != QUOTE_NONE:
             if dialect.quotechar is None:
                 raise Error('quotechar must be set if quoting enabled')
-            cls.validate_text(dialect, 'quotechar', one_char=True)
+            cls.validate_text(dialect, 'quotechar')
 
     @staticmethod
-    def validate_text(dialect, attr, one_char=False):
+    def validate_text(dialect, attr):
         val = getattr(dialect, attr)
         if not isinstance(val, text_type):
             if type(val) == bytes:
@@ -129,7 +129,7 @@ class Dialect(object):
             raise Error('"{0}" must be string, not {1}'.format(
                 attr, type(val).__name__))
 
-        if one_char and len(val) != 1:
+        if len(val) != 1:
             raise Error('"{0}" must be a 1-character string'.format(attr))
 
     @staticmethod
