@@ -29,8 +29,11 @@ class writer(object):
         self.fileobj = fileobj
         self.dialect = Dialect.combine(dialect, fmtparams)
 
+    def prepfield(self, field):
+        return text_type(field)
+
     def writerow(self, row):
-        row = [text_type(item) for item in row]
+        row = [self.prepfield(field) for field in row]
         line = self.dialect.delimiter.join(row) + self.dialect.lineterminator
         self.fileobj.write(line)
 
