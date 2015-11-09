@@ -812,12 +812,12 @@ class TestDialectValidity(TestCase):
         mydialect.quotechar = "''"
         exception = self.assertRaisesGetException(csv.Error, mydialect)
         self.assertEqual(str(exception),
-                         '"quotechar" must be a 1-character string')
+                         str('"quotechar" must be a 1-character string'))
 
         mydialect.quotechar = 4
         exception = self.assertRaisesGetException(csv.Error, mydialect)
         self.assertEqual(str(exception),
-                         '"quotechar" must be string, not int')
+                         str('"quotechar" must be string, not int'))
 
     def test_delimiter(self):
         class mydialect(csv.Dialect):
@@ -833,22 +833,22 @@ class TestDialectValidity(TestCase):
         mydialect.delimiter = ":::"
         exception = self.assertRaisesGetException(csv.Error, mydialect)
         self.assertEqual(str(exception),
-                         '"delimiter" must be a 1-character string')
+                         str('"delimiter" must be a 1-character string'))
 
         mydialect.delimiter = ""
         exception = self.assertRaisesGetException(csv.Error, mydialect)
         self.assertEqual(str(exception),
-                         '"delimiter" must be a 1-character string')
+                         str('"delimiter" must be a 1-character string'))
 
         mydialect.delimiter = b","
         exception = self.assertRaisesGetException(csv.Error, mydialect)
         self.assertEqual(str(exception),
-                         '"delimiter" must be string, not bytes')
+                         str('"delimiter" must be string, not bytes'))
 
         mydialect.delimiter = 4
         exception = self.assertRaisesGetException(csv.Error, mydialect)
         self.assertEqual(str(exception),
-                         '"delimiter" must be string, not int')
+                         str('"delimiter" must be string, not int'))
 
     def test_lineterminator(self):
         class mydialect(csv.Dialect):
@@ -868,7 +868,7 @@ class TestDialectValidity(TestCase):
         mydialect.lineterminator = 4
         exception = self.assertRaisesGetException(csv.Error, mydialect)
         self.assertEqual(str(exception),
-                         '"lineterminator" must be a string')
+                         str('"lineterminator" must be a string'))
 
     def do_invalid_chars(self, field_name):
         def create_invalid(field_name, value):

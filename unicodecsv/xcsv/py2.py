@@ -27,7 +27,7 @@ unichr = chr if PY3 else unichr
 class writer(object):
     def __init__(self, fileobj, dialect='excel', **fmtparams):
         self.fileobj = fileobj
-        self.dialect = Dialect.extend(dialect, **fmtparams)
+        self.dialect = Dialect.combine(dialect, fmtparams)
 
     def writerow(self, row):
         row = [text_type(item) for item in row]
@@ -42,7 +42,7 @@ class writer(object):
 class reader(object):
     def __init__(self, fileobj, dialect='excel', **fmtparams):
         self.fileobj = iter(fileobj)
-        self.dialect = Dialect.extend(dialect, **fmtparams)
+        self.dialect = Dialect.combine(dialect, fmtparams)
         self.line_num = 0
 
     def __iter__(self):
@@ -80,7 +80,7 @@ class Dialect(object):
     """Describe a CSV dialect.
     This must be subclassed (see csv.excel).  Valid attributes are:
     delimiter, quotechar, escapechar, doublequote, skipinitialspace,
-    lineterminator, quoting.
+    lineterminator, quoting, strict.
     """
     _name = ""
     _valid = False
@@ -92,6 +92,7 @@ class Dialect(object):
     skipinitialspace = None
     lineterminator = None
     quoting = None
+    strict = None
 
     def __init__(self):
         self.validate(self)
@@ -100,38 +101,80 @@ class Dialect(object):
 
     @classmethod
     def validate(cls, dialect):
-        cls.validate_text(dialect, 'quotechar', one_char=True)
+        dialect = cls.extend(dialect)
+
+        if not isinstance(dialect.quoting, int):
+            raise Error('"quoting" must be an integer')
+
+        if dialect.delimiter is None:
+            raise Error('delimiter must be set')
         cls.validate_text(dialect, 'delimiter', one_char=True)
-        cls.validate_text(dialect, 'lineterminator', one_char=False)
+
+        if dialect.lineterminator is None:
+            raise Error('lineterminator must be set')
+        if not isinstance(dialect.lineterminator, text_type):
+            raise Error('"lineterminator" must be a string')
+
+        if dialect.quoting != QUOTE_NONE:
+            if dialect.quotechar is None:
+                raise Error('quotechar must be set if quoting enabled')
+            cls.validate_text(dialect, 'quotechar', one_char=True)
 
     @staticmethod
     def validate_text(dialect, attr, one_char=False):
         val = getattr(dialect, attr)
         if not isinstance(val, text_type):
-            if type(dialect.quotechar) == bytes:
-                raise Error('"{0}" must be a string, not bytes'.format(attr))
-            raise Error('"{0}" must be a string, not {1}'.format(
+            if type(val) == bytes:
+                raise Error('"{0}" must be string, not bytes'.format(attr))
+            raise Error('"{0}" must be string, not {1}'.format(
                 attr, type(val).__name__))
 
         if one_char and len(val) != 1:
             raise Error('"{0}" must be a 1-character string'.format(attr))
 
+    @staticmethod
+    def defaults():
+        return {
+            'delimiter': ',',
+            'doublequote': True,
+            'escapechar': None,
+            'lineterminator': '\r\n',
+            'quotechar': '"',
+            'quoting': QUOTE_MINIMAL,
+            'skipinitialspace': False,
+            'strict': False, 
+        }
+
     @classmethod
-    def extend(cls, dialect, **fmtparams):
-        """Create a new dialect with the added parameters."""
+    def extend(cls, dialect, fmtparams=None):
         if isinstance(dialect, string_types):
             dialect = get_dialect(dialect)
 
-        attrs = [
-            'delimiter', 'quotechar', 'escapechar', 'doublequote',
-            'skipinitialspace', 'lineterminator', 'quoting',
-        ]
-        if fmtparams:
-            new_fmtparams = dict(
-                (attr, getattr(dialect, attr, None)) for attr in attrs)
-            new_fmtparams.update(fmtparams)
-            dialect = type(str('ExtendedDialect'), (cls,), new_fmtparams)
+        if fmtparams is None:
+            return dialect
 
+        defaults = cls.defaults()
+        specified = dict(
+            (attr, getattr(dialect, attr, None))
+            for attr in cls.defaults()
+        )
+
+        specified.update(fmtparams)
+        return type(str('ExtendedDialect'), (cls,), specified)
+
+    @classmethod
+    def combine(cls, dialect, fmtparams):
+        """Create a new dialect with defaults and added parameters."""
+        dialect = cls.extend(dialect, fmtparams)
+        defaults = cls.defaults()
+        specified = dict(
+            (attr, getattr(dialect, attr, None))
+            for attr in defaults
+            if getattr(dialect, attr, None) is not None
+        )
+
+        defaults.update(specified)
+        dialect = type(str('CombinedDialect'), (cls,), defaults)
         cls.validate(dialect)
         return dialect
 
