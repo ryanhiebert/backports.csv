@@ -49,18 +49,24 @@ class reader(object):
         return self
 
     def __next__(self):
-        line = ''
-        while not line.strip():
+        lineterminators = ['\r\n', '\r', '\n']
+        line = '\n'
+        while line in lineterminators:
             line = next(self.fileobj)
 
-        lineterminators = ['\r\n', '\r', '\n']
         for lineterminator in lineterminators:
             if line.endswith(lineterminator):
                 line = line[:-len(lineterminator)]
                 break
 
         self.line_num += 1
-        return line.split(self.dialect.delimiter)
+        fields = line.split(self.dialect.delimiter)
+
+        limit = field_size_limit()
+        if any(len(field) > limit for field in fields):
+            raise Error('Field is too long')
+
+        return fields
 
     next = __next__
 
