@@ -53,8 +53,12 @@ class reader(object):
         while not line.strip():
             line = next(self.fileobj)
 
-        if line.endswith(self.dialect.lineterminator):
-            line = line[:-(len(self.dialect.lineterminator))]
+        lineterminators = ['\r\n', '\r', '\n']
+        for lineterminator in lineterminators:
+            if line.endswith(lineterminator):
+                line = line[:-len(lineterminator)]
+                break
+
         self.line_num += 1
         return line.split(self.dialect.delimiter)
 
