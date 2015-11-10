@@ -19,7 +19,7 @@ from csv import (
 import sys
 PY3 = sys.version_info[0] == 3
 string_types = str if PY3 else basestring
-number_types = (int, float) if PY3 else (int, long, float)
+number_types = (int, float, complex) if PY3 else (int, long, float, complex)
 text_type = str if PY3 else unicode
 binary_type = bytes if PY3 else str
 unichr = chr if PY3 else unichr
