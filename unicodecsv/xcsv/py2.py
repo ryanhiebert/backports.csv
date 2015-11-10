@@ -34,45 +34,49 @@ class QuoteStrategy(object):
         self.dialect = dialect
         self.setup()
 
+        self.specialchars_re_quoted = re.compile(r'({quotechar})'.format(
+            quotechar=re.escape(self.dialect.quotechar)))
+        self.specialchars_re_unquoted = re.compile(
+            r'([{specialchars}])'.format(
+                specialchars=re.escape(self.specialchars)))
+
     def setup(self):
-        pass
+        """Optional method for strategy-wide optimizations."""
 
     def quoted(self, field=None, raw_field=None):
-        raise NotImplementedError('quoted must be implemented by a subclass')
+        """Determine whether this field should be quoted."""
+        raise NotImplementedError(
+            'quoted must be implemented by a subclass')
+
+    @property
+    def specialchars(self):
+        """The special characters that need to be escaped."""
+        raise NotImplementedError(
+            'specialchars must be implemented by a subclass')
+
+    def specialchars_re(self, quoted=None):
+        if quoted:
+            return self.specialchars_re_quoted
+        return self.specialchars_re_unquoted
+
+    def escapechar(self, quoted=None):
+        if quoted and self.dialect.doublequote:
+            return self.dialect.quotechar
+        return self.dialect.escapechar
 
     def prepare(self, raw_field):
         field = text_type(raw_field)
         quoted = self.quoted(field=field, raw_field=raw_field)
 
-        specialchars = self.dialect.lineterminator
-        if self.dialect.quoting != QUOTE_NONE:
-            specialchars += self.dialect.quotechar
-        if self.dialect.escapechar:
-            specialchars += self.dialect.escapechar
+        specialchars_re = self.specialchars_re(quoted=quoted)
+        escapechar = self.escapechar(quoted=quoted)
 
-        if quoted:
-            quotechar = self.dialect.quotechar
-            escapechar = self.dialect.escapechar
-            if self.dialect.doublequote:
-                escapechar = quotechar
-
-            if quotechar in field:
-                if escapechar is None:
-                    raise Error('quotechar found, and no ecapechar is set')
-                field = re.sub(
-                    re.escape(quotechar),
-                    re.escape(escapechar + quotechar),
-                    field,
-                )
-        else:
-            if any(char in field for char in specialchars):
-                field = re.sub(
-                    r'([{specialchars}])'.format(
-                        specialchars=re.escape(specialchars)),
-                    r'{escapechar}\1'.format(
-                        escapechar=re.escape(sel.dialect.escapechar)),
-                    field,
-                )
+        if specialchars_re.search(field):
+            if not escapechar:
+                raise Error('No escapechar is set')
+            escape_replace = r'{escapechar}\1'.format(
+                escapechar=re.escape(escapechar))
+            field = specialchars_re.sub(escape_replace, field)
 
         if quoted:
             field = '{quotechar}{field}{quotechar}'.format(
@@ -85,29 +89,54 @@ class QuoteMinimalStrategy(QuoteStrategy):
     quoting = QUOTE_MINIMAL
 
     def setup(self):
-        specialchars = self.dialect.lineterminator
+        self.quoted_re = re.compile(r'[{specialchars}]'.format(
+            specialchars=re.escape(self.specialchars)))
+
+    @property
+    def specialchars(self):
+        specialchars = self.dialect.lineterminator + self.dialect.quotechar
         if self.dialect.escapechar:
             specialchars += self.dialect.escapechar
-        self.quoted_re = re.compile(r'[{specialchars}]'.format(
-            specialchars=re.escape(specialchars)))
+        return specialchars
 
     def quoted(self, field, **kwargs):
         return bool(self.quoted_re.search(field))
 
+
 class QuoteAllStrategy(QuoteStrategy):
     quoting = QUOTE_ALL
+
+    @property
+    def specialchars(self):
+        return self.dialect.quotechar
 
     def quoted(self, **kwargs):
         return True
 
+
 class QuoteNonnumericStrategy(QuoteStrategy):
     quoting = QUOTE_NONNUMERIC
+
+    @property
+    def specialchars(self):
+        specialchars = self.dialect.lineterminator + self.dialect.quotechar
+        if self.dialect.escapechar:
+            specialchars += self.dialect.escapechar
+        return specialchars
 
     def quoted(self, raw_field, **kwargs):
         return not isinstance(raw_field, number_types)
 
+
 class QuoteNoneStrategy(QuoteStrategy):
     quoting = QUOTE_NONE
+
+    @property
+    def specialchars(self):
+        specialchars = self.dialect.lineterminator
+        if self.dialect.escapechar:
+            specialchars += self.dialect.escapechar
+        return specialchars
 
     def quoted(self, **kwargs):
         return False
