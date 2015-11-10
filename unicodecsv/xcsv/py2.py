@@ -25,12 +25,15 @@ binary_type = bytes if PY3 else str
 unichr = chr if PY3 else unichr
 
 
-class writer(object):
-    def __init__(self, fileobj, dialect='excel', **fmtparams):
-        self.fileobj = fileobj
-        self.dialect = Dialect.combine(dialect, fmtparams)
+class QuoteStrategy(object):
+    quoting = None
 
-    def prepfield(self, field):
+    def __init__(self, dialect):
+        if self.quoting is None:
+            assert dialect.quoting == self.quoting
+        self.dialect = dialect
+
+    def prepare(self, field):
         numeric = isinstance(field, number_types)
         field = text_type(field)
 
@@ -80,8 +83,34 @@ class writer(object):
 
         return field
 
+
+class QuoteMinimalStrategy(QuoteStrategy):
+    quoting = QUOTE_MINIMAL
+
+class QuoteAllStrategy(QuoteStrategy):
+    quoting = QUOTE_ALL
+
+class QuoteNonnumericStrategy(QuoteStrategy):
+    quoting = QUOTE_NONNUMERIC
+
+class QuoteNoneStrategy(QuoteStrategy):
+    quoting = QUOTE_NONE
+
+
+class writer(object):
+    def __init__(self, fileobj, dialect='excel', **fmtparams):
+        self.fileobj = fileobj
+        self.dialect = Dialect.combine(dialect, fmtparams)
+        strategies = {
+            QUOTE_MINIMAL: QuoteMinimalStrategy,
+            QUOTE_ALL: QuoteAllStrategy,
+            QUOTE_NONNUMERIC: QuoteNonnumericStrategy,
+            QUOTE_NONE: QuoteNoneStrategy,
+        }
+        self.strategy = strategies[self.dialect.quoting](self.dialect)
+
     def writerow(self, row):
-        row = [self.prepfield(field) for field in row]
+        row = [self.strategy.prepare(field) for field in row]
         line = self.dialect.delimiter.join(row) + self.dialect.lineterminator
         self.fileobj.write(line)
 
