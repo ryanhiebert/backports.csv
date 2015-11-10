@@ -248,7 +248,7 @@ class unix_dialect(Dialect):
 register_dialect("unix", unix_dialect)
 
 
-class DictReader:
+class DictReader(object):
     def __init__(self, f, fieldnames=None, restkey=None, restval=None,
                  dialect="excel", *args, **kwds):
         self._fieldnames = fieldnames   # list of keys for the dict
@@ -300,7 +300,7 @@ class DictReader:
     next = __next__
 
 
-class DictWriter:
+class DictWriter(object):
     def __init__(self, f, fieldnames, restval="", extrasaction="raise",
                  dialect="excel", *args, **kwds):
         self.fieldnames = fieldnames    # list of keys for the dict
@@ -335,7 +335,7 @@ try:
 except NameError:
     complex = float
 
-class Sniffer:
+class Sniffer(object):
     '''
     "Sniffs" the format of a CSV file (i.e. delimiter, quotechar)
     Returns a Dialect object.
