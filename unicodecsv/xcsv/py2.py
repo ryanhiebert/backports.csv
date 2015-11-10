@@ -19,6 +19,7 @@ from csv import (
 import sys
 PY3 = sys.version_info[0] == 3
 string_types = str if PY3 else basestring
+number_types = (int, float) if PY3 else (int, long, float)
 text_type = str if PY3 else unicode
 binary_type = bytes if PY3 else str
 unichr = chr if PY3 else unichr
@@ -30,7 +31,54 @@ class writer(object):
         self.dialect = Dialect.combine(dialect, fmtparams)
 
     def prepfield(self, field):
-        return text_type(field)
+        numeric = isinstance(field, number_types)
+        field = text_type(field)
+
+        specialchars = self.dialect.lineterminator
+        if self.dialect.quoting != QUOTE_NONE:
+            specialchars += self.dialect.quotechar
+        if self.dialect.escapechar:
+            specialchars += self.dialect.escapechar
+
+        # Figure out whether this field will be quoted
+        if self.dialect.quoting == QUOTE_NONE:
+            quoting = False
+        elif self.dialect.quoting == QUOTE_ALL:
+            quoting = True
+        elif self.dialect.quoting == QUOTE_NONNUMERIC:
+            quoting = not numeric
+        else:  # QUOTE_MINIMAL
+            quoting = any(char in field for char in specialchars)
+
+        if quoting:
+            quotechar = self.dialect.quotechar
+            escapechar = self.dialect.escapechar
+            if self.dialect.doublequote:
+                escapechar = quotechar
+
+            if quotechar in field:
+                if escapechar is None:
+                    raise Error('quotechar found, and no ecapechar is set')
+                field = re.sub(
+                    re.escape(quotechar),
+                    re.escape(escapechar + quotechar),
+                    field,
+                )
+        else:
+            if any(char in field for char in specialchars):
+                field = re.sub(
+                    r'([{specialchars}])'.format(
+                        specialchars=re.escape(specialchars)),
+                    r'{escapechar}\1'.format(
+                        escapechar=re.escape(sel.dialect.escapechar)),
+                    field,
+                )
+
+        if quoting:
+            field = '{quotechar}{field}{quotechar}'.format(
+                quotechar=self.dialect.quotechar, field=field)
+
+        return field
 
     def writerow(self, row):
         row = [self.prepfield(field) for field in row]
