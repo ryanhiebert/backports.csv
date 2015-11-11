@@ -100,10 +100,12 @@ class QuoteMinimalStrategy(QuoteStrategy):
 
     @property
     def specialchars(self):
-        specialchars = self.dialect.lineterminator + self.dialect.quotechar
-        if self.dialect.escapechar:
-            specialchars += self.dialect.escapechar
-        return specialchars
+        return (
+            self.dialect.lineterminator +
+            self.dialect.quotechar +
+            self.dialect.delimiter +
+            (self.dialect.escapechar or '')
+        )
 
     def quoted(self, field, **kwargs):
         return bool(self.quoted_re.search(field))
@@ -125,11 +127,12 @@ class QuoteNonnumericStrategy(QuoteStrategy):
 
     @property
     def specialchars(self):
-        specialchars = self.dialect.lineterminator + self.dialect.quotechar
-        if self.dialect.escapechar:
-            specialchars += self.dialect.escapechar
-        return specialchars
-
+        return (
+            self.dialect.lineterminator +
+            self.dialect.quotechar +
+            self.dialect.delimiter +
+            (self.dialect.escapechar or '')
+        )
     def quoted(self, raw_field, **kwargs):
         return not isinstance(raw_field, number_types)
 
@@ -139,10 +142,11 @@ class QuoteNoneStrategy(QuoteStrategy):
 
     @property
     def specialchars(self):
-        specialchars = self.dialect.lineterminator
-        if self.dialect.escapechar:
-            specialchars += self.dialect.escapechar
-        return specialchars
+        return (
+            self.dialect.lineterminator +
+            self.dialect.delimiter +
+            (self.dialect.escapechar or '')
+        )
 
     def quoted(self, **kwargs):
         return False
