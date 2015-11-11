@@ -40,9 +40,9 @@ class QuoteStrategy(object):
         self.dialect = dialect
         self.setup()
 
-        self.specialchars_re_quoted = re.compile(r'({quotechar})'.format(
+        self.escape_re_quoted = re.compile(r'({quotechar})'.format(
             quotechar=re.escape(self.dialect.quotechar)))
-        self.specialchars_re_unquoted = re.compile(
+        self.escape_re_unquoted = re.compile(
             r'([{specialchars}])'.format(
                 specialchars=re.escape(self.specialchars)))
 
@@ -60,10 +60,10 @@ class QuoteStrategy(object):
         raise NotImplementedError(
             'specialchars must be implemented by a subclass')
 
-    def specialchars_re(self, quoted=None):
+    def escape_re(self, quoted=None):
         if quoted:
-            return self.specialchars_re_quoted
-        return self.specialchars_re_unquoted
+            return self.escape_re_quoted
+        return self.escape_re_unquoted
 
     def escapechar(self, quoted=None):
         if quoted and self.dialect.doublequote:
@@ -74,15 +74,15 @@ class QuoteStrategy(object):
         field = text_type(raw_field)
         quoted = self.quoted(field=field, raw_field=raw_field)
 
-        specialchars_re = self.specialchars_re(quoted=quoted)
+        escape_re = self.escape_re(quoted=quoted)
         escapechar = self.escapechar(quoted=quoted)
 
-        if specialchars_re.search(field):
+        if escape_re.search(field):
             if not escapechar:
                 raise Error('No escapechar is set')
             escape_replace = r'{escapechar}\1'.format(
                 escapechar=re.escape(escapechar))
-            field = specialchars_re.sub(escape_replace, field)
+            field = escape_re.sub(escape_replace, field)
 
         if quoted:
             field = '{quotechar}{field}{quotechar}'.format(
