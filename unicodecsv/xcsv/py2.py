@@ -337,8 +337,8 @@ class reader(object):
         elif c == '\0':
             self.state = START_RECORD
         else:
-            Error('new-line character seen in unquoted field - '
-                  'do you need to open the file in universal-newline mode?')
+            raise Error('new-line character seen in unquoted field - do you '
+                        'need to open the file in universal-newline mode?')
 
 
     def __iter__(self):
