@@ -208,7 +208,8 @@ class reader(object):
         self.fields.append(field)
 
     def parse_add_char(self, c):
-        # Removed a check for long fields from original C code
+        if len(self.field) >= field_size_limit():
+            raise Error('field size limit exceeded')
         self.field.append(c)
 
     def parse_process_char(self, c):
@@ -353,9 +354,9 @@ class reader(object):
                 if len(self.field) != 0 or self.state == IN_QUOTED_FIELD:
                     if self.dialect.strict:
                         raise Error('unexpected end of data')
-                    else:
-                        self.parse_save_field()
-                        break
+                    self.parse_save_field()
+                if self.fields:
+                    break
                 raise
 
             if not isinstance(lineobj, text_type):
