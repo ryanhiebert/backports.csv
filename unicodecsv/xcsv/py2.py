@@ -188,7 +188,14 @@ AFTER_ESCAPED_CRNL = 8
 class reader(object):
     def __init__(self, fileobj, dialect='excel', **fmtparams):
         self.input_iter = iter(fileobj)
-        self.dialect = Dialect.combine(dialect, fmtparams)
+
+        if isinstance(dialect, text_type):
+            dialect = get_dialect(dialect)
+
+        try:
+            self.dialect = Dialect.combine(dialect, fmtparams)
+        except Error:
+            raise TypeError('Invalid dialect parameters')
 
         self.fields = None
         self.field = None
@@ -516,7 +523,7 @@ class Dialect(object):
             (attr, getattr(dialect, attr, None))
             for attr in defaults
             if getattr(dialect, attr, None) is not None or
-                attr == 'quotechar'
+                attr in ['quotechar', 'delimiter', 'lineterminator', 'quoting']
         )
 
         defaults.update(specified)
