@@ -249,7 +249,7 @@ class reader(object):
             pass  # Ignore space at start of field
         elif c == self.dialect.delimiter:
             # Save empty field
-            self.parse_save_field
+            self.parse_save_field()
         else:
             # Begin new unquoted field
             if self.dialect.quoting == QUOTE_NONNUMERIC:
