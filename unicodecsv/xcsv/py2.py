@@ -335,7 +335,7 @@ class reader(object):
         if c == '\n' or c == '\r':
             pass
         elif c == '\0':
-            self.state == START_RECORD
+            self.state = START_RECORD
         else:
             Error('new-line character seen in unquoted field - '
                   'do you need to open the file in universal-newline mode?')
