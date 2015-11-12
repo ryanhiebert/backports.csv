@@ -174,33 +174,210 @@ class writer(object):
             self.writerow(row)
 
 
+START_RECORD = 0
+START_FIELD = 1
+ESCAPED_CHAR = 2
+IN_FIELD = 3
+IN_QUOTED_FIELD = 4
+ESCAPE_IN_QUOTED_FIELD = 5
+QUOTE_IN_QUOTED_FIELD = 6
+EAT_CRNL = 7
+AFTER_ESCAPED_CRNL = 8
+
+
 class reader(object):
     def __init__(self, fileobj, dialect='excel', **fmtparams):
-        self.fileobj = iter(fileobj)
+        self.input_iter = iter(fileobj)
         self.dialect = Dialect.combine(dialect, fmtparams)
+
+        self.fields = None
+        self.field = None
         self.line_num = 0
+
+    def parse_reset(self):
+        self.fields = []
+        self.field = []
+        self.state = START_RECORD
+        self.numeric_field = 0
+
+    def parse_save_field(self):
+        field = ''.join(self.field)
+        self.field = []
+        if self.numeric_field:
+            field = float(field)
+        self.fields.append(field)
+
+    def parse_add_char(self, c):
+        # Removed a check for long fields from original C code
+        self.field.append(c)
+
+    def parse_process_char(self, c):
+        switch = {
+            START_RECORD: self._parse_start_record,
+            START_FIELD: self._parse_start_field,
+            ESCAPED_CHAR: self._parse_escaped_char,
+            AFTER_ESCAPED_CRNL: self._parse_after_escaped_crnl,
+            IN_FIELD: self._parse_in_field,
+            IN_QUOTED_FIELD: self._parse_in_quoted_field,
+            ESCAPE_IN_QUOTED_FIELD: self._parse_escape_in_quoted_field,
+            QUOTE_IN_QUOTED_FIELD: self._parse_quote_in_quoted_field,
+            EAT_CRNL: self._parse_eat_crnl,
+        }
+        return switch[self.state](c)
+
+    def _parse_start_record(self, c):
+        if c == '\0':
+            return
+        elif c == '\n' or c == '\r':
+            self.state = EAT_CRNL
+            return
+
+        self.state = START_FIELD
+        return self._parse_start_field(c)
+
+    def _parse_start_field(self, c):
+        if c == '\n' or c == '\r' or c == '\0':
+            self.parse_save_field()
+            self.state = START_RECORD if c == '\0' else EAT_CRNL
+        elif (c == self.dialect.quotechar and
+              self.dialect.quoting != QUOTE_NONE):
+            self.state = IN_QUOTED_FIELD
+        elif c == self.dialect.escapechar:
+            self.state = ESCAPED_CHAR
+        elif c == ' ' and self.dialect.skipinitialspace:
+            pass  # Ignore space at start of field
+        elif c == self.dialect.delimiter:
+            # Save empty field
+            self.parse_save_field
+        else:
+            # Begin new unquoted field
+            if self.dialect.quoting == QUOTE_NONNUMERIC:
+                self.numeric_field = 1
+            self.parse_add_char(c)
+            self.state = IN_FIELD
+
+    def _parse_escaped_char(self, c):
+        if c == '\n' or c == '\r':
+            self.parse_add_char(c)
+            self.state = AFTER_ESCAPED_CRNL
+            return
+        if c == '\0':
+            c = '\n'
+        self.parse_add_char(c)
+        self.state = IN_FIELD
+
+    def _parse_after_escaped_crnl(self, c):
+        if c == '\0':
+            return
+        return self._parse_in_field(c)
+
+    def _parse_in_field(self, c):
+        # In unquoted field
+        if c == '\n' or c == '\r' or c == '\0':
+            # End of line - return [fields]
+            self.parse_save_field()
+            self.state = START_RECORD if c == '\0' else EAT_CRNL
+        elif c == self.dialect.escapechar:
+            self.state = ESCAPED_CHAR
+        elif c == self.dialect.delimiter:
+            self.parse_save_field()
+            self.state = START_FIELD
+        else:
+            # Normal character - save in field
+            self.parse_add_char(c)
+
+    def _parse_in_quoted_field(self, c):
+        if c == '\0':
+            pass
+        elif c == self.dialect.escapechar:
+            self.state = ESCAPE_IN_QUOTED_FIELD
+        elif (c == self.dialect.quotechar and
+              self.dialect.quoting != QUOTE_NONE):
+            if self.dialect.doublequote:
+                self.state = QUOTE_IN_QUOTED_FIELD
+            else:
+                self.state = IN_FIELD
+        else:
+            self.parse_add_char(c)
+
+    def _parse_escape_in_quoted_field(self, c):
+        if c == '\0':
+            c = '\n'
+
+        self.parse_add_char(c)
+        self.state = IN_QUOTED_FIELD
+
+    def _parse_quote_in_quoted_field(self, c):
+        if (self.dialect.quoting != QUOTE_NONE and
+                c == self.dialect.quotechar):
+            # save "" as "
+            self.parse_add_char(c)
+            self.state = IN_QUOTED_FIELD
+        elif c == self.dialect.delimiter:
+            self.parse_save_field()
+            self.state = START_FIELD
+        elif c == '\n' or c == '\r' or c == '\0':
+            # End of line = return [fields]
+            self.parse_save_field()
+            self.state = START_RECORD if c == '\0' else EAT_CRNL
+        elif not self.dialect.strict:
+            self.parse_add_char(c)
+            self.state = IN_FIELD
+        else:
+            # illegal
+            raise Error("{delimiter}' expected after '{quotechar}".format(
+                delimiter=self.dialect.delimiter,
+                quotechar=self.dialect.quotechar,
+            ))
+
+    def _parse_eat_crnl(self, c):
+        if c == '\n' or c == '\r':
+            pass
+        elif c == '\0':
+            self.state == START_RECORD
+        else:
+            Error('new-line character seen in unquoted field - '
+                  'do you need to open the file in universal-newline mode?')
+
 
     def __iter__(self):
         return self
 
     def __next__(self):
-        lineterminators = ['\r\n', '\r', '\n']
-        line = '\n'
-        while line in lineterminators:
-            line = next(self.fileobj)
+        self.parse_reset()
 
-        for lineterminator in lineterminators:
-            if line.endswith(lineterminator):
-                line = line[:-len(lineterminator)]
+        while True:
+            try:
+                lineobj = next(self.input_iter)
+            except StopIteration:
+                if len(self.field) != 0 or self.state == IN_QUOTED_FIELD:
+                    if self.dialect.strict:
+                        raise Error('unexpected end of data')
+                    else:
+                        self.parse_save_field()
+                        break
+                raise
+
+            if not isinstance(lineobj, text_type):
+                typ = type(lineobj)
+                typ_name = 'bytes' if typ == bytes else typ.__name__
+                err_str = ('iterator should return strings, not {0}'
+                           ' (did you open the file in text mode?)')
+                raise Error(err_str.format(typ_name))
+
+            self.line_num += 1
+            for c in lineobj:
+                if c == '\0':
+                    raise Error('line contains NULL byte')
+                self.parse_process_char(c)
+
+            self.parse_process_char('\0')
+
+            if self.state == START_RECORD:
                 break
 
-        self.line_num += 1
-        fields = line.split(self.dialect.delimiter)
-
-        limit = field_size_limit()
-        if any(len(field) > limit for field in fields):
-            raise Error('Field is too long')
-
+        fields = self.fields
+        self.fields = None
         return fields
 
     next = __next__
