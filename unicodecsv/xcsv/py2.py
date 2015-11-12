@@ -71,7 +71,7 @@ class QuoteStrategy(object):
         return self.dialect.escapechar
 
     def prepare(self, raw_field):
-        field = text_type(raw_field)
+        field = text_type(raw_field if raw_field is not None else '')
         quoted = self.quoted(field=field, raw_field=raw_field)
 
         escape_re = self.escape_re(quoted=quoted)
@@ -165,7 +165,18 @@ class writer(object):
         self.strategy = strategies[self.dialect.quoting](self.dialect)
 
     def writerow(self, row):
+        if row is None:
+            raise Error('row must be an iterable')
+
         row = [self.strategy.prepare(field) for field in row]
+        if row == ['']:
+            if self.dialect.quoting == QUOTE_NONE:
+                raise Error('Quoting required, but disallowed')
+            else:
+                row = [
+                    '{quotechar}{quotechar}'.format(
+                        quotechar=self.dialect.quotechar)
+                ]
         line = self.dialect.delimiter.join(row) + self.dialect.lineterminator
         self.fileobj.write(line)
 
