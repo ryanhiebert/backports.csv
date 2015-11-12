@@ -198,13 +198,14 @@ class reader(object):
         self.fields = []
         self.field = []
         self.state = START_RECORD
-        self.numeric_field = 0
+        self.numeric_field = False
 
     def parse_save_field(self):
         field = ''.join(self.field)
         self.field = []
         if self.numeric_field:
             field = float(field)
+            self.numeric_field = False
         self.fields.append(field)
 
     def parse_add_char(self, c):
@@ -253,7 +254,7 @@ class reader(object):
         else:
             # Begin new unquoted field
             if self.dialect.quoting == QUOTE_NONNUMERIC:
-                self.numeric_field = 1
+                self.numeric_field = True
             self.parse_add_char(c)
             self.state = IN_FIELD
 
@@ -455,9 +456,10 @@ class Dialect(object):
             raise Error('"lineterminator" must be a string')
 
         if dialect.quoting != QUOTE_NONE:
-            if dialect.quotechar is None:
+            if dialect.quotechar is None and dialect.escapechar is None:
                 raise Error('quotechar must be set if quoting enabled')
-            cls.validate_text(dialect, 'quotechar')
+            if dialect.quotechar is not None:
+                cls.validate_text(dialect, 'quotechar')
 
     @staticmethod
     def validate_text(dialect, attr):
@@ -513,7 +515,8 @@ class Dialect(object):
         specified = dict(
             (attr, getattr(dialect, attr, None))
             for attr in defaults
-            if getattr(dialect, attr, None) is not None
+            if getattr(dialect, attr, None) is not None or
+                attr == 'quotechar'
         )
 
         defaults.update(specified)
