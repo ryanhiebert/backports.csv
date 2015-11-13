@@ -404,7 +404,7 @@ class reader(object):
 
 
 _dialect_registry = {}
-def register_dialect(name, dialect=None, **fmtparams):
+def register_dialect(name, dialect='excel', **fmtparams):
     if not isinstance(name, text_type):
         raise TypeError('"name" must be a string')
 
