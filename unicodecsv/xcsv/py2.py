@@ -154,8 +154,19 @@ class QuoteNoneStrategy(QuoteStrategy):
 
 class writer(object):
     def __init__(self, fileobj, dialect='excel', **fmtparams):
+        if fileobj is None:
+            raise TypeError('fileobj must be file-like, not None')
+
         self.fileobj = fileobj
-        self.dialect = Dialect.combine(dialect, fmtparams)
+
+        if isinstance(dialect, text_type):
+            dialect = get_dialect(dialect)
+
+        try:
+            self.dialect = Dialect.combine(dialect, fmtparams)
+        except Error:
+            raise TypeError('Invalid dialect parameters')
+
         strategies = {
             QUOTE_MINIMAL: QuoteMinimalStrategy,
             QUOTE_ALL: QuoteAllStrategy,
