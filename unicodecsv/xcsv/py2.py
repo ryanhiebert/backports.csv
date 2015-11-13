@@ -473,6 +473,10 @@ class Dialect(object):
         if not isinstance(dialect.lineterminator, text_type):
             raise Error('"lineterminator" must be a string')
 
+        if dialect.quoting not in [
+                QUOTE_NONE, QUOTE_MINIMAL, QUOTE_NONNUMERIC, QUOTE_ALL]:
+            raise Error('Invalid quoting specified')
+
         if dialect.quoting != QUOTE_NONE:
             if dialect.quotechar is None and dialect.escapechar is None:
                 raise Error('quotechar must be set if quoting enabled')
