@@ -158,7 +158,7 @@ class QuoteNoneStrategy(QuoteStrategy):
 
     def quoted(self, field, only, **kwargs):
         if field == '' and only:
-            raise Error('Quoting required, but disallowed')
+            raise Error('single empty field record must be quoted')
         return False
 
 
