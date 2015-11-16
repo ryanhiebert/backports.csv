@@ -35,16 +35,18 @@ class QuoteStrategy(object):
     quoting = None
 
     def __init__(self, dialect):
-        if self.quoting is None:
+        if self.quoting is not None:
             assert dialect.quoting == self.quoting
         self.dialect = dialect
         self.setup()
 
-        self.escape_re_quoted = re.compile(r'({quotechar})'.format(
-            quotechar=re.escape(self.dialect.quotechar)))
-        self.escape_re_unquoted = re.compile(
-            r'([{specialchars}])'.format(
-                specialchars=re.escape(self.specialchars)))
+        escape_pattern_quoted = r'({quotechar})'.format(
+            quotechar=re.escape(self.dialect.quotechar))
+        escape_pattern_unquoted = r'([{specialchars}])'.format(
+            specialchars=re.escape(self.specialchars))
+
+        self.escape_re_quoted = re.compile(escape_pattern_quoted)
+        self.escape_re_unquoted = re.compile(escape_pattern_unquoted)
 
     def setup(self):
         """Optional method for strategy-wide optimizations."""
@@ -78,10 +80,10 @@ class QuoteStrategy(object):
         escapechar = self.escapechar(quoted=quoted)
 
         if escape_re.search(field):
+            escapechar = '\\\\' if escapechar == '\\' else escapechar
             if not escapechar:
                 raise Error('No escapechar is set')
-            escape_replace = r'{escapechar}\1'.format(
-                escapechar=re.escape(escapechar))
+            escape_replace = r'{escapechar}\1'.format(escapechar=escapechar)
             field = escape_re.sub(escape_replace, field)
 
         if quoted:
@@ -133,6 +135,7 @@ class QuoteNonnumericStrategy(QuoteStrategy):
             self.dialect.delimiter +
             (self.dialect.escapechar or '')
         )
+
     def quoted(self, raw_field, **kwargs):
         return not isinstance(raw_field, number_types)
 
