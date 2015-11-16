@@ -110,6 +110,10 @@ class QuoteMinimalStrategy(QuoteStrategy):
         )
 
     def quoted(self, field, only, **kwargs):
+        if field == self.dialect.quotechar and not self.dialect.doublequote:
+            # If the only character in the field is the quotechar, and
+            # doublequote is false, then just escape without outer quotes.
+            return False
         return field == '' and only or bool(self.quoted_re.search(field))
 
 
@@ -147,6 +151,7 @@ class QuoteNoneStrategy(QuoteStrategy):
     def specialchars(self):
         return (
             self.dialect.lineterminator +
+            (self.dialect.quotechar or '') +
             self.dialect.delimiter +
             (self.dialect.escapechar or '')
         )
