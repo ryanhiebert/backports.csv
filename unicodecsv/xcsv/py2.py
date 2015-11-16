@@ -49,7 +49,7 @@ class QuoteStrategy(object):
     def setup(self):
         """Optional method for strategy-wide optimizations."""
 
-    def quoted(self, field=None, raw_field=None):
+    def quoted(self, field=None, raw_field=None, only=None):
         """Determine whether this field should be quoted."""
         raise NotImplementedError(
             'quoted must be implemented by a subclass')
@@ -70,9 +70,9 @@ class QuoteStrategy(object):
             return self.dialect.quotechar
         return self.dialect.escapechar
 
-    def prepare(self, raw_field):
+    def prepare(self, raw_field, only=None):
         field = text_type(raw_field if raw_field is not None else '')
-        quoted = self.quoted(field=field, raw_field=raw_field)
+        quoted = self.quoted(field=field, raw_field=raw_field, only=only)
 
         escape_re = self.escape_re(quoted=quoted)
         escapechar = self.escapechar(quoted=quoted)
@@ -107,8 +107,8 @@ class QuoteMinimalStrategy(QuoteStrategy):
             (self.dialect.escapechar or '')
         )
 
-    def quoted(self, field, **kwargs):
-        return bool(self.quoted_re.search(field))
+    def quoted(self, field, only, **kwargs):
+        return field == '' and only or bool(self.quoted_re.search(field))
 
 
 class QuoteAllStrategy(QuoteStrategy):
@@ -148,7 +148,9 @@ class QuoteNoneStrategy(QuoteStrategy):
             (self.dialect.escapechar or '')
         )
 
-    def quoted(self, **kwargs):
+    def quoted(self, field, only, **kwargs):
+        if field == '' and only:
+            raise Error('Quoting required, but disallowed')
         return False
 
 
@@ -179,15 +181,10 @@ class writer(object):
         if row is None:
             raise Error('row must be an iterable')
 
-        row = [self.strategy.prepare(field) for field in row]
-        if row == ['']:
-            if self.dialect.quoting == QUOTE_NONE:
-                raise Error('Quoting required, but disallowed')
-            else:
-                row = [
-                    '{quotechar}{quotechar}'.format(
-                        quotechar=self.dialect.quotechar)
-                ]
+        row = list(row)
+        only = len(row) == 1
+        row = [self.strategy.prepare(field, only=only) for field in row]
+
         line = self.dialect.delimiter.join(row) + self.dialect.lineterminator
         self.fileobj.write(line)
 
