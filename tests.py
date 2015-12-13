@@ -10,7 +10,7 @@ import unittest
 from io import BytesIO, StringIO, TextIOWrapper
 import gc
 
-from unicodecsv import xcsv as csv
+from backports import csv
 
 
 def TemporaryFile(mode='w+b', newline=None, encoding=None):

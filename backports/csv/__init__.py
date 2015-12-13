@@ -10,4 +10,4 @@ unicode natively, while Python 2's csv does not.
 """
 import sys
 
-from unicodecsv.xcsv.py2 import *
+from .py2 import *
