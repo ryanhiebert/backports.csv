@@ -3,6 +3,7 @@ from setuptools import setup
 setup(
     name='backports.csv',
     description='Backport of Python 3 csv module',
+    long_description=open('README.rst', 'rb').read().decode('utf-8'),
     author='Ryan Hiebert',
     author_email='ryan@ryanhiebert.com',
     url='https://github.com/ryanhiebert/backports.csv',

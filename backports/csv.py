@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """A port of Python 3's csv module to Python 2.
 
-The API of the csv module in Python 2 is drastically different from the
-the csv module in Python 3. This is due for the most part to the
+The API of the csv module in Python 2 is drastically different from
+the csv module in Python 3. This is due, for the most part, to the
 difference between str in Python 2 and Python 3.
 
 The semantics of Python 3's version are more useful because they support
