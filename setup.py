@@ -7,6 +7,8 @@ setup(
     author_email='ryan@ryanhiebert.com',
     url='https://github.com/ryanhiebert/backports.csv',
     version='1.0',
+    py_modules=['backports.csv'],
+    namespace_packages=['backports'],
     classifiers=[
         'Programming Language :: Python',
         'Programming Language :: Python :: 2',
