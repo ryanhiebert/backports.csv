@@ -12,6 +12,9 @@ import gc
 
 from backports import csv
 
+PY3 = sys.version_info[0] == 3
+text_type = str if PY3 else unicode
+
 
 def TemporaryFile(mode='w+b', newline=None, encoding=None):
     """
@@ -781,7 +784,7 @@ class TestArrayWrites(TestCase):
 
     def test_char_write(self):
         import array, string
-        a = array.array(str('u'), string.ascii_letters)
+        a = array.array(str('u'), text_type(string.ascii_letters))
 
         with TemporaryFile("w+", newline='') as fileobj:
             writer = csv.writer(fileobj, dialect="excel")
