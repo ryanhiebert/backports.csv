@@ -10,7 +10,10 @@ import unittest
 from io import BytesIO, StringIO, TextIOWrapper
 import gc
 
-from backports import csv
+try:
+    from backports import csv
+except ImportError:
+    import csv
 
 PY3 = sys.version_info[0] == 3
 text_type = str if PY3 else unicode
