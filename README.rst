@@ -47,3 +47,8 @@ your ``TextIOWrapper``.
         with TextIOWrapper(open(filename, 'wb'), encoding='utf-8') as f:
             for row in rows:
                 writer.writerow(row)
+
+
+.. image:: https://badges.gitter.im/ryanhiebert/backports.csv.svg
+   :alt: Join the chat at https://gitter.im/ryanhiebert/backports.csv
+   :target: https://gitter.im/ryanhiebert/backports.csv?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
