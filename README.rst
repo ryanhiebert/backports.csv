@@ -45,5 +45,6 @@ your ``TextIOWrapper``.
 
     def write_csv(filename, rows):
         with TextIOWrapper(open(filename, 'wb'), encoding='utf-8') as f:
+            writer = csv.writer(f)
             for row in rows:
                 writer.writerow(row)
