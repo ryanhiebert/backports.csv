@@ -182,8 +182,8 @@ class writer(object):
 
         try:
             self.dialect = Dialect.combine(dialect, fmtparams)
-        except Error:
-            raise TypeError('Invalid dialect parameters')
+        except Error as e:
+            raise TypeError(*e.args)
 
         strategies = {
             QUOTE_MINIMAL: QuoteMinimalStrategy,
