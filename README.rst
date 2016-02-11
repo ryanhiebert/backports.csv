@@ -38,10 +38,11 @@ First make sure you're starting your file off right:
 
 
 Then be careful with your files to handle the encoding.
-I suggest using ``io.TextIOWrapper``,
-opening your file in binary mode,
-and declaring your desired encoding when constructing
-your ``TextIOWrapper``.
+If you're working with a binary file-like object,
+``io.TextIOWrapper`` can be very helpful.
+If you're dealing with a file, you can just use ``io.open``
+instead of Python 2's ``open`` builtin, and it works
+just like Python 3's builtin ``open``.
 
 .. code-block:: python
 
@@ -49,16 +50,15 @@ your ``TextIOWrapper``.
     import io
 
     def read_csv(filename):
-        with io.TextIOWrapper(io.open(filename, 'rb'), encoding='utf-8') as f:
-            reader = csv.reader(f)
-            for row in reader:
+        with io.open(filename, encoding='utf-8') as f:
+            for row in csv.reader(f):
                 yield row
 
     def write_csv(filename, rows):
-        with io.TextIOWrapper(io.open(filename, 'wb'), encoding='utf-8') as f:
+        with io.open(filename, 'w', encoding='utf-8') as f:
             writer = csv.writer(f)
             for row in rows:
-                writer.writerow(row)
+                writer.writerows(row)
 
 License
 =======
