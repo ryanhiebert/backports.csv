@@ -2,6 +2,17 @@
 backports.csv: Backport of Python 3's csv module
 ================================================
 
+.. image:: https://img.shields.io/pypi/v/backports.csv.svg
+   :target: https://pypi.python.org/pypi/backports.csv
+   :alt: Latest Version
+
+.. image:: https://travis-ci.org/ryanhiebert/backports.csv.svg?branch=master
+   :target: https://travis-ci.org/ryanhiebert/backports.csv
+
+.. image:: https://badges.gitter.im/ryanhiebert/backports.csv.svg
+   :alt: Join the chat at https://gitter.im/ryanhiebert/backports.csv
+   :target: https://gitter.im/ryanhiebert/backports.csv?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
+
 The API of the csv module in Python 2 is drastically different from
 the csv module in Python 3. This is due, for the most part, to the
 difference between str in Python 2 and Python 3.
@@ -48,8 +59,3 @@ your ``TextIOWrapper``.
             writer = csv.writer(f)
             for row in rows:
                 writer.writerow(row)
-
-
-.. image:: https://badges.gitter.im/ryanhiebert/backports.csv.svg
-   :alt: Join the chat at https://gitter.im/ryanhiebert/backports.csv
-   :target: https://gitter.im/ryanhiebert/backports.csv?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
