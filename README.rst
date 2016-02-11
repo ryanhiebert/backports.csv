@@ -59,3 +59,10 @@ your ``TextIOWrapper``.
             writer = csv.writer(f)
             for row in rows:
                 writer.writerow(row)
+
+License
+=======
+
+This is a port of the csv module in the Python 3 standard libary.
+Because of this, backports.csv follows the same license as Python,
+whatever that may be at any given point in time.
