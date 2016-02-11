@@ -46,16 +46,16 @@ your ``TextIOWrapper``.
 .. code-block:: python
 
     from backports import csv
-    from io import TextIOWrapper
+    import io
 
     def read_csv(filename):
-        with TextIOWrapper(open(filename, 'rb'), encoding='utf-8') as f:
+        with io.TextIOWrapper(io.open(filename, 'rb'), encoding='utf-8') as f:
             reader = csv.reader(f)
             for row in reader:
                 yield row
 
     def write_csv(filename, rows):
-        with TextIOWrapper(open(filename, 'wb'), encoding='utf-8') as f:
+        with io.TextIOWrapper(io.open(filename, 'wb'), encoding='utf-8') as f:
             writer = csv.writer(f)
             for row in rows:
                 writer.writerow(row)
