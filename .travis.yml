@@ -16,4 +16,4 @@ matrix:
   fast_finish: true
   include:
     - python: "3.5"
-      env: TOXENV=noinst
+      env: TOXENV=stdlib
