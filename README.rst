@@ -50,15 +50,17 @@ just like Python 3's builtin ``open``.
     import io
 
     def read_csv(filename):
-        with io.open(filename, encoding='utf-8') as f:
+        with io.open(filename, newline='', encoding='utf-8') as f:
             for row in csv.reader(f):
                 yield row
 
     def write_csv(filename, rows):
-        with io.open(filename, 'w', encoding='utf-8') as f:
+        with io.open(filename, 'w', newline='', encoding='utf-8') as f:
             writer = csv.writer(f)
             for row in rows:
                 writer.writerows(row)
+
+note: It should always be safe to specify newline='', since the csv module does its own (universal) newline handling.
 
 License
 =======
