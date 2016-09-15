@@ -1,19 +1,19 @@
 sudo: false
 language: python
 python:
-  - "2.6"
-  - "2.7"
-  - "3.3"
-  - "3.4"
-  - "3.5"
-  - "pypy"
+- '2.6'
+- '2.7'
+- '3.3'
+- '3.4'
+- '3.5'
+- pypy
 install: pip install tox-travis
 script: tox
 branches:
   only:
-    - master
+  - master
 matrix:
   fast_finish: true
   include:
-    - python: "3.5"
-      env: TOXENV=stdlib
+  - python: '3.5'
+    env: TOXENV=stdlib
