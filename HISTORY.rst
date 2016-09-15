@@ -1,3 +1,9 @@
+next
+++++
+
+* Avoid quoting any numeric types when using ``QUOTE_NONNUMERIC``.
+  _ thanks to @torfsen for the bug report
+
 1.0.1 (2016-02-11)
 ++++++++++++++++++
 

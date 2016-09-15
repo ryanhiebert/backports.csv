@@ -1041,5 +1041,19 @@ class TestUnicode(TestCase):
             self.assertEqual(fileobj.read(), expected)
 
 
+class TestRegression(TestCase):
+    """Tests of bugs not covered by the standard tests."""
+
+    def test_quote_nonnumeric_decimal(self):
+        """Decimals should not be quoted with non-numeric quoting."""
+        import decimal
+        with TemporaryFile('w+', newline='', encoding='utf-8') as fileobj:
+            writer = csv.writer(fileobj, quoting=csv.QUOTE_NONNUMERIC)
+            writer.writerow([10, 10.0, decimal.Decimal('10.0'), '10.0'])
+            expected = '10,10.0,10.0,"10.0"\r\n'
+            fileobj.seek(0)
+            self.assertEqual(fileobj.read(), expected)
+
+
 if __name__ == '__main__':
     unittest.main()

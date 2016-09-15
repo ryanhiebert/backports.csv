@@ -17,6 +17,7 @@ __all__ = [ "QUOTE_MINIMAL", "QUOTE_ALL", "QUOTE_NONNUMERIC", "QUOTE_NONE",
             "unregister_dialect", "__version__", "DictReader", "DictWriter" ]
 
 import re
+import numbers
 from io import StringIO
 from csv import (
     QUOTE_MINIMAL, QUOTE_ALL, QUOTE_NONNUMERIC, QUOTE_NONE,
@@ -28,13 +29,11 @@ import sys
 PY3 = sys.version_info[0] == 3
 if PY3:
     string_types = str
-    number_types = int, float, complex
     text_type = str
     binary_type = bytes
     unichr = chr
 else:
     string_types = basestring
-    number_types = int, long, float, complex
     text_type = unicode
     binary_type = str
 
@@ -149,7 +148,7 @@ class QuoteNonnumericStrategy(QuoteStrategy):
         )
 
     def quoted(self, raw_field, **kwargs):
-        return not isinstance(raw_field, number_types)
+        return not isinstance(raw_field, numbers.Number)
 
 
 class QuoteNoneStrategy(QuoteStrategy):
