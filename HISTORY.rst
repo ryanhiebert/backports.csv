@@ -1,5 +1,5 @@
-next
-++++
+1.0.2 (2016-09-15)
+++++++++++++++++++
 
 * Avoid quoting any numeric types when using ``QUOTE_NONNUMERIC``.
   _ thanks to @torfsen for the bug report

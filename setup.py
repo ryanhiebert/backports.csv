@@ -11,7 +11,7 @@ setup(
     author='Ryan Hiebert',
     author_email='ryan@ryanhiebert.com',
     url='https://github.com/ryanhiebert/backports.csv',
-    version='1.0.1',
+    version='1.0.2',
     py_modules=['backports.csv'],
     namespace_packages=['backports'],
     classifiers=[
