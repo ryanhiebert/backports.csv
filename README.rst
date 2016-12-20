@@ -13,6 +13,10 @@ backports.csv: Backport of Python 3's csv module
    :alt: Join the chat at https://gitter.im/ryanhiebert/backports.csv
    :target: https://gitter.im/ryanhiebert/backports.csv?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
 
+.. image:: https://requires.io/github/ryanhiebert/backports.csv/requirements.svg?branch=master
+   :target: https://requires.io/github/ryanhiebert/backports.csv/requirements/?branch=master
+   :alt: Requirements Status
+
 The API of the csv module in Python 2 is drastically different from
 the csv module in Python 3. This is due, for the most part, to the
 difference between str in Python 2 and Python 3.
