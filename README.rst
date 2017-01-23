@@ -66,10 +66,3 @@ just like Python 3's builtin ``open``.
 
 Note: It should always be safe to specify ``newline=''``,
 since the csv module does its own (universal) newline handling.
-
-License
-=======
-
-This is a port of the csv module in the Python 3 standard libary.
-Because of this, backports.csv follows the same license as Python,
-whatever that may be at any given point in time.
