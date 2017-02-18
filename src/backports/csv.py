@@ -201,7 +201,7 @@ class writer(object):
         row = [self.strategy.prepare(field, only=only) for field in row]
 
         line = self.dialect.delimiter.join(row) + self.dialect.lineterminator
-        self.fileobj.write(line)
+        return self.fileobj.write(line)
 
     def writerows(self, rows):
         for row in rows:

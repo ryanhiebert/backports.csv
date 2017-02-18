@@ -1054,6 +1054,12 @@ class TestRegression(TestCase):
             fileobj.seek(0)
             self.assertEqual(fileobj.read(), expected)
 
+    def test_writerow_return(self):
+        """writerow should return the return value from calling write."""
+        with TemporaryFile('w+', newline='', encoding='utf-8') as fileobj:
+            writer = csv.writer(fileobj)
+            self.assertEqual(writer.writerow([10, 10.0, 'Piña Colada']), 21)
+
 
 if __name__ == '__main__':
     unittest.main()
