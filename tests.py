@@ -1060,6 +1060,52 @@ class TestRegression(TestCase):
             writer = csv.writer(fileobj)
             self.assertEqual(writer.writerow([10, 10.0, 'Piña Colada']), 21)
 
+    def test_quote_none_quotechar_none(self):
+        """A QUOTE_NONE dialect should not error if quotechar is None."""
+        class CustomDialect(csv.Dialect):
+            delimiter = '\t'
+            skipinitialspace = False
+            lineterminator = '\n'
+            escapechar = None
+            quoting = csv.QUOTE_NONE
+
+        csv.writer(io.StringIO(), CustomDialect)
+
+    def test_quote_none_quotechar_undefined(self):
+        """A QUOTE_NONE dialect should not error if quotechar is undefined."""
+        class CustomDialect(csv.Dialect):
+            delimiter = '\t'
+            skipinitialspace = False
+            lineterminator = '\n'
+            quoting = csv.QUOTE_NONE
+
+        csv.writer(io.StringIO(), CustomDialect)
+
+    def test_quote_all_quotechar_none(self):
+        """A QUOTE_ALL dialect should error if quotechar is None."""
+        class CustomDialect(csv.Dialect):
+            delimiter = '\t'
+            skipinitialspace = False
+            lineterminator = '\n'
+            quotechar = None
+            quoting = csv.QUOTE_ALL
+
+        exception = self.assertRaisesGetException(
+            TypeError, csv.writer, io.StringIO(), CustomDialect)
+        assert exception.args[0] == 'quotechar must be set if quoting enabled'
+
+    def test_quote_all_quotechar_unset(self):
+        """A QUOTE_ALL dialect should error if quotechar is unset."""
+        class CustomDialect(csv.Dialect):
+            delimiter = '\t'
+            skipinitialspace = False
+            lineterminator = '\n'
+            quoting = csv.QUOTE_ALL
+
+        exception = self.assertRaisesGetException(
+            TypeError, csv.writer, io.StringIO(), CustomDialect)
+        assert exception.args[0] == 'quotechar must be set if quoting enabled'
+
 
 if __name__ == '__main__':
     unittest.main()

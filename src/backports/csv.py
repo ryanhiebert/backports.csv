@@ -48,7 +48,7 @@ class QuoteStrategy(object):
         self.setup()
 
         escape_pattern_quoted = r'({quotechar})'.format(
-            quotechar=re.escape(self.dialect.quotechar))
+            quotechar=re.escape(self.dialect.quotechar or '"'))
         escape_pattern_unquoted = r'([{specialchars}])'.format(
             specialchars=re.escape(self.specialchars))
 
