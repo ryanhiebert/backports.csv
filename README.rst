@@ -62,7 +62,7 @@ just like Python 3's builtin ``open``.
         with io.open(filename, 'w', newline='', encoding='utf-8') as f:
             writer = csv.writer(f)
             for row in rows:
-                writer.writerows(row)
+                writer.writerow(row)
 
 Note: It should always be safe to specify ``newline=''``,
 since the csv module does its own (universal) newline handling.
