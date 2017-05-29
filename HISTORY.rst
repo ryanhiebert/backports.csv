@@ -1,3 +1,11 @@
+1.0.5 (2017-05-29)
+++++++++++++++++++
+
+* Fix bug in README example. (#22)
+  - thanks to @tantale for the bug report
+* Allow ``None`` as quotechar when using ``QUOTE_NONE``. (#23)
+  - thanks to @thanatos for the bug report
+
 1.0.4 (2017-02-17)
 ++++++++++++++++++
 
