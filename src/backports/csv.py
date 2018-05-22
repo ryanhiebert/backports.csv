@@ -228,8 +228,8 @@ class reader(object):
 
         try:
             self.dialect = Dialect.combine(dialect, fmtparams)
-        except Error:
-            raise TypeError('Invalid dialect parameters')
+        except Error as e:
+            raise TypeError(*e.args)
 
         self.fields = None
         self.field = None
