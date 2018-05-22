@@ -1,3 +1,10 @@
+1.0.6 (2018-05-22)
+++++++++++++++++++
+
+* Pass reader error messages along. (#28)
+  This should help make errors more transparent.
+  - thanks to @mpeteuil for the pull request
+
 1.0.5 (2017-05-29)
 ++++++++++++++++++
 
