@@ -1,12 +1,12 @@
 sudo: false
 language: python
 python:
-- '2.6'
-- '2.7'
-- '3.4'
-- '3.5'
-- '3.6'
-- pypy
+  - "2.6"
+  - "2.7"
+  - "3.4"
+  - "3.5"
+  - "3.6"
+  - pypy
 install: pip install tox-travis
 script: tox
 
@@ -18,20 +18,20 @@ stages:
 jobs:
   fast_finish: true
   include:
-  - python: '3.6'
-    env: TOXENV=stdlib
-  - python: '3.3'
-    install: pip install --upgrade pytest .
-    script: pytest
-  - stage: deploy
-    python: '3.6'
-    install: skip
-    script: skip
-    deploy:
-      provider: pypi
-      on:
-        tags: true
-      user: ryanhiebert-auto
-      password:
-        secure: iT4ChWbOLq7oNIYWvyN8Iw5l3FI9Uvv12wWJl9JtaiTHlQ8pDckEsp7lTogQahngSxLDFFugAWTfhCm3bLH7rpVTUQ2TlPnJVmpGw2iJkckWRUKIQHYbWf+KXbRhceQQ9AtKUwJQHbzsBLmkT0vnnjvZO5yvHttoe5aRCGNZ0LhquRQqVC4uFIrMplyOEVSFWqSinr7C4/Y+umGLrSho3bo3EhU2UaUmOs92exaiLL9iuKaYia9s3LN5467b8oeYhnfqr2Zwr9NHRyYELmeE7V32Jnm/2remtxVi8+xlMmPEVAXsX/ys+aVL0mI1yNWHNhIXkrNoKAndV8kzp9wQLlOPMLgQYqfeuH2NGApQ0LcbZ1QI3xj7GeQmjdxUA8SxmrIUPc/opiZ9FKyV8NNTXdl2UWKsy6gbBADI93ecwcPwiPJ0tiInhlngmdJerjunavzZM2K/9+3isi4MTlOh0SSS6SHPhe0HN520W2aK8Lg6NvLiHrpVFWIXeUTG75G6JI9ryHCxd6SevjFh87ZphP/qj4UareFXDzZFMN4qltMXeqyOgE/Hx/2FJA4aAylsz6qj4JJag6YAu/ZXG1risZu/Moikmbk0c+wLgcwdYFKzCjtSYIdCALor5d7BJco9N6lLRTbcvTpy6i5VGQ2aWT18pCzPa908gLZg02hT2e8=
-      distributions: sdist bdist_wheel
+    - python: "3.6"
+      env: TOXENV=stdlib
+    - python: "3.3"
+      install: pip install --upgrade pytest "setuptools<40" .
+      script: pytest
+    - stage: deploy
+      python: "3.6"
+      install: skip
+      script: skip
+      deploy:
+        provider: pypi
+        on:
+          tags: true
+        user: ryanhiebert-auto
+        password:
+          secure: iT4ChWbOLq7oNIYWvyN8Iw5l3FI9Uvv12wWJl9JtaiTHlQ8pDckEsp7lTogQahngSxLDFFugAWTfhCm3bLH7rpVTUQ2TlPnJVmpGw2iJkckWRUKIQHYbWf+KXbRhceQQ9AtKUwJQHbzsBLmkT0vnnjvZO5yvHttoe5aRCGNZ0LhquRQqVC4uFIrMplyOEVSFWqSinr7C4/Y+umGLrSho3bo3EhU2UaUmOs92exaiLL9iuKaYia9s3LN5467b8oeYhnfqr2Zwr9NHRyYELmeE7V32Jnm/2remtxVi8+xlMmPEVAXsX/ys+aVL0mI1yNWHNhIXkrNoKAndV8kzp9wQLlOPMLgQYqfeuH2NGApQ0LcbZ1QI3xj7GeQmjdxUA8SxmrIUPc/opiZ9FKyV8NNTXdl2UWKsy6gbBADI93ecwcPwiPJ0tiInhlngmdJerjunavzZM2K/9+3isi4MTlOh0SSS6SHPhe0HN520W2aK8Lg6NvLiHrpVFWIXeUTG75G6JI9ryHCxd6SevjFh87ZphP/qj4UareFXDzZFMN4qltMXeqyOgE/Hx/2FJA4aAylsz6qj4JJag6YAu/ZXG1risZu/Moikmbk0c+wLgcwdYFKzCjtSYIdCALor5d7BJco9N6lLRTbcvTpy6i5VGQ2aWT18pCzPa908gLZg02hT2e8=
+        distributions: sdist bdist_wheel
