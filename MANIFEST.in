@@ -1,1 +1,2 @@
 include *.rst
+include tox.ini tests.py
