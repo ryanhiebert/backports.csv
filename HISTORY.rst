@@ -1,3 +1,11 @@
+2.0 (TBD)
++++++++++
+
+* Drop support for Python 2.6 and 3.3.
+  Python 3.3 is no longer supported by many build tools.
+  We are also wanting to use OrderedDict,
+  which is not in Python 2.6's stdlib.
+
 1.0.7 (2019-03-10)
 ++++++++++++++++++
 
