@@ -1,3 +1,9 @@
+1.0.7 (2019-03-10)
+++++++++++++++++++
+
+* Add tests to ``MANIFEST.in``.
+  - thanks to @jayvdb for the pull request
+
 1.0.6 (2018-05-22)
 ++++++++++++++++++
 
