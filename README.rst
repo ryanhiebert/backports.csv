@@ -65,5 +65,5 @@ just like Python 3's builtin ``open``.
             for row in rows:
                 writer.writerow(row)
 
-Note: It should always be safe to specify ``newline=''``,
+Note: It is safe to specify ``newline=''``,
 since the csv module does its own (universal) newline handling.
