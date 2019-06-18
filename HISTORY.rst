@@ -5,7 +5,7 @@
   Python 3.3 is no longer supported by many build tools.
   We are also wanting to use OrderedDict,
   which is not in Python 2.6's stdlib.
-* Use OrderedDict in DictReader.
+* Update to match Python 3.6, especially to use OrderedDict in DictReader.
   - thanks to @pombredanne for the initial pull request and persistence
 
 1.0.7 (2019-03-10)
