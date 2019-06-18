@@ -9,15 +9,16 @@ The semantics of Python 3's version are more useful because they support
 unicode natively, while Python 2's csv does not.
 """
 from __future__ import unicode_literals, absolute_import
-
-__all__ = [ "QUOTE_MINIMAL", "QUOTE_ALL", "QUOTE_NONNUMERIC", "QUOTE_NONE",
+__all__ = ["QUOTE_MINIMAL", "QUOTE_ALL", "QUOTE_NONNUMERIC", "QUOTE_NONE",
             "Error", "Dialect", "__doc__", "excel", "excel_tab",
             "field_size_limit", "reader", "writer",
             "register_dialect", "get_dialect", "list_dialects", "Sniffer",
-            "unregister_dialect", "__version__", "DictReader", "DictWriter" ]
+           "unregister_dialect", "__version__", "DictReader", "DictWriter",
+           "unix_dialect"]
 
 import re
 import numbers
+from collections import OrderedDict
 from io import StringIO
 from csv import (
     QUOTE_MINIMAL, QUOTE_ALL, QUOTE_NONNUMERIC, QUOTE_NONE,
@@ -459,9 +460,11 @@ def list_dialects():
 
 class Dialect(object):
     """Describe a CSV dialect.
+
     This must be subclassed (see csv.excel).  Valid attributes are:
     delimiter, quotechar, escapechar, doublequote, skipinitialspace,
-    lineterminator, quoting, strict.
+    lineterminator, quoting.
+
     """
     _name = ""
     _valid = False
@@ -473,7 +476,6 @@ class Dialect(object):
     skipinitialspace = None
     lineterminator = None
     quoting = None
-    strict = None
 
     def __init__(self):
         self.validate(self)
@@ -645,7 +647,7 @@ class DictReader(object):
         # values
         while row == []:
             row = next(self.reader)
-        d = dict(zip(self.fieldnames, row))
+        d = OrderedDict(zip(self.fieldnames, row))
         lf = len(self.fieldnames)
         lr = len(row)
         if lf < lr:
@@ -745,10 +747,10 @@ class Sniffer(object):
         """
 
         matches = []
-        for restr in ('(?P<delim>[^\w\n"\'])(?P<space> ?)(?P<quote>["\']).*?(?P=quote)(?P=delim)', # ,".*?",
-                      '(?:^|\n)(?P<quote>["\']).*?(?P=quote)(?P<delim>[^\w\n"\'])(?P<space> ?)',   #  ".*?",
-                      '(?P<delim>>[^\w\n"\'])(?P<space> ?)(?P<quote>["\']).*?(?P=quote)(?:$|\n)',  # ,".*?"
-                      '(?:^|\n)(?P<quote>["\']).*?(?P=quote)(?:$|\n)'):                            #  ".*?" (no delim, no space)
+        for restr in (r'(?P<delim>[^\w\n"\'])(?P<space> ?)(?P<quote>["\']).*?(?P=quote)(?P=delim)', # ,".*?",
+                      r'(?:^|\n)(?P<quote>["\']).*?(?P=quote)(?P<delim>[^\w\n"\'])(?P<space> ?)',   #  ".*?",
+                      r'(?P<delim>[^\w\n"\'])(?P<space> ?)(?P<quote>["\']).*?(?P=quote)(?:$|\n)',   # ,".*?"
+                      r'(?:^|\n)(?P<quote>["\']).*?(?P=quote)(?:$|\n)'):                            #  ".*?" (no delim, no space)
             regexp = re.compile(restr, re.DOTALL | re.MULTILINE)
             matches = regexp.findall(data)
             if matches:
