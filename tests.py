@@ -1154,7 +1154,6 @@ class TestUnicode(unittest.TestCase):
             fileobj.seek(0)
             self.assertEqual(fileobj.read(), expected)
 
-
 class KeyOrderingTest(unittest.TestCase):
 
     def test_ordering_for_the_dict_reader_and_writer(self):
