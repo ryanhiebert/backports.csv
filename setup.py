@@ -6,6 +6,7 @@ def fread(fn):
 
 setup(
     name='backports.csv',
+    license='Python License',
     description='Backport of Python 3 csv module',
     long_description=fread('README.rst') + '\n\n' + fread('HISTORY.rst'),
     author='Ryan Hiebert',
